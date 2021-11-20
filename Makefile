@@ -1,23 +1,15 @@
-.PHONY: run clean
+EFIDIR=boot
+BUILDDIR=build
 
-QEMU=/usr/local/bin/qemu-system-x86_64
-BUILD_DIR=build
-CFLAGS=-Wall -Werror --std=c11 -pedantic -o
-SRC=src/*.c
-NASM_FLAGS=-f bin -o
-NASM_SRC=boot/*.asm
+all: boot.efi
 
+boot.efi: | $(BUILDDIR)
+	@echo "[MAKE] Building UEFI application for boot loader..."
+	$(MAKE) -C $(EFIDIR)
+	mv $(EFIDIR)/$@ $(BUILDDIR)/$@
+	$(MAKE) -C $(EFIDIR) clean
 
-all: kernel.o boot.bin
+$(BUILDDIR):
+	@echo "[MAKE] Preparing build directories..."
+	mkdir $(BUILDDIR)
 
-kernel.o:
-	$(CC) $(CFLAGS) $(BUILD_DIR)/$@ $(SRC)
-
-boot.bin:
-	nasm $(NASM_FLAGS) $(BUILD_DIR)/$@ $(NASM_SRC)
-
-run: boot.bin
-	$(QEMU) $(BUILD_DIR)/$?
-
-clean:
-	rm build/*
