@@ -13,7 +13,7 @@ TARGET=$(BUILDDIR)/$(OS).iso
 QEMUARGS=-drive file=$(TARGET) -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none
 
 
-all: $(TARGET) clean
+all: $(TARGET)
 
 $(BUILDDIR):
 	@echo "[MAKE] Creating build directory..."
@@ -39,7 +39,7 @@ $(TARGET): $(IMAGE)
 
 clean:
 	@echo "[MAKE] Cleaning build objects..."
-	rm build/*
+	rm -f build/*
 
 run: $(TARGET)
 	@echo "[MAKE] Running QEMU..."
