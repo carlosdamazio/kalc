@@ -1,7 +1,4 @@
-#include <stdio.h>
-
-int main()
+int _start()
 {
-		printf("Hello, world!\n");
-		return 0;
+    return 123;
 }
