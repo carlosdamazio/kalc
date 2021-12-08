@@ -39,6 +39,7 @@ $(IMAGE): $(KERNEL) $(BOOTLOADER)
 	mmd -i $@ ::/EFI/BOOT
 	mcopy -i $@ $(BOOTLOADER) ::/EFI/BOOT
 	mcopy -i $@ $(EFIDIR)/startup.nsh :: 
+	mcopy -i $@ $(KERNEL) ::
 		
 $(TARGET): $(IMAGE)
 	@echo "[MAKE] Building $@..."

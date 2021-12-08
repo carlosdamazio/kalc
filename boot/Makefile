@@ -1,9 +1,9 @@
 LD=ld
 
 ARCH=x86_64
-SRC=main.c
-OBJ=main.o
-STATIC=main.so 
+SRC=src/main.c
+OBJ=src/main.o
+STATIC=src/main.so 
 TARGET=main.efi
 
 EFILIB=gnu-efi
