@@ -22,7 +22,7 @@ LDFLAGS=-nostdlib \
 		-L$(EFILIB)/$(ARCH)/lib \
 		-L$(EFILIB)/$(ARCH)/gnuefi \
 		-T$(EFILIB)/gnuefi/elf_$(ARCH)_efi.lds \
-		$(EFILIB)/x86_64/gnuefi/crt0-efi-$(ARCH).o \
+		$(EFILIB)/$(ARCH)/gnuefi/crt0-efi-$(ARCH).o \
 
 OBJFLAGS=-j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc \
 		 --target efi-app-$(ARCH) --subsystem=10
