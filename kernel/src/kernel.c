@@ -1,6 +1,10 @@
 #include "output.h"
 
-int _start()
+void _start()
 {
-    return 123;
+    kprint("Hello, world!\n");
+
+    for (;;) {
+
+    }
 }
