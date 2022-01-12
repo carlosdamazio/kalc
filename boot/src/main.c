@@ -2,6 +2,9 @@
 #include <efilib.h>
 #include <elf.h>
 
+#include "efiprot.h"
+#include "output.h"
+
 int mem_cmp(const void *aptr, const void *bptr, int n)
 {
     const unsigned char *a = aptr, *b = bptr;
@@ -114,8 +117,14 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
 
     Print((CHAR16 *)L"Kernel is loaded\r\n");
 
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = GetGOP();
+    if (gop == NULL) {
+        return EFI_ERROR("Couldn't get GOP");
+    }
+
     void (*KernelStart)() = ((__attribute__((sysv_abi)) void (*)() ) header.e_entry);
     KernelStart();
+
     return EFI_SUCCESS;
 }
 
