@@ -2,15 +2,13 @@
 #define OUTPUT_H
 #endif
 
-#include "ktypes.h"
-
-
 typedef struct {
-    void         *base_address;
-    u64          buffer_sz;
-    unsigned int width;
-    unsigned int height;
-    unsigned int pixels_per_scan_line;
-} Framebuffer;
+    void          *FrameBufferBase;
+    unsigned long FrameBufferSize;
+    unsigned int  HorizontalRes;
+    unsigned int  VerticalRes;
+    unsigned int  PixelsPerScanLine;
+} FrameBuffer;
 
-void plot_line(Framebuffer *buff, int x, int y, u32 pixel);
+void
+draw_line(FrameBuffer *buff, int y, int bbp, unsigned long long pixel);
