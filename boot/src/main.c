@@ -154,9 +154,11 @@ PSF_Font*
 LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
 {
     EFI_FILE *font = LoadFile(Directory, Path, ImageHandle); 
-    if (font == NULL)
+    if (font == NULL) {
+        Print((CHAR16*) L"Font not loaded.\r\n");
         return NULL;
-    Print((CHAR16*) L"Loaded font file.");
+    }
+    Print((CHAR16*) L"Loaded font file.\r\n");
     PSF_Header *header;
     uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF_Header),
             (void **) &header);
@@ -164,7 +166,9 @@ LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
     font->Read(font, &header_size, header);
 
     if (header->magic[0] != PSF_MAGIC0 || header->magic[1] != PSF_MAGIC1) {
-        Print((CHAR16*) L"File has invalid magic number in header.");
+        Print((CHAR16*) L"Magic 0: %x\r\n", header->magic[0]);
+        Print((CHAR16*) L"Magic 1: %x\r\n", header->magic[1]);
+        Print((CHAR16*) L"File has invalid magic number in header.\r\n");
         return NULL;
     }
 
@@ -275,7 +279,7 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     FrameBuffer *buff = NewFrameBuffer(gop);
     Print((CHAR16*) L"Got framebuffer.\r\n");
 
-    PSF_Font *font = LoadFont(NULL, (CHAR16*)"zap-vga16.psf", Image);
+    PSF_Font *font = LoadFont(NULL, (CHAR16*)L"zap-light16.psf", Image);
     if (font == NULL) {
         Print((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
         return EFI_ERROR((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
