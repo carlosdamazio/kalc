@@ -21,5 +21,15 @@ typedef struct {
     unsigned int  PixelsPerScanLine;
 } FrameBuffer;
 
-void
-draw_line(FrameBuffer *buff, int y, int bbp, unsigned long long pixel);
+typedef struct {
+    unsigned int x;
+    unsigned int y;
+} OutputCursor;
+
+static OutputCursor output_cursor = {.x = 0, .y = 0};
+
+void draw_line(FrameBuffer *buff, int y, int bbp, unsigned long long colour);
+void put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour, 
+              char chr, unsigned int x_offset, unsigned int y_offset);
+void print_string_line(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
+                  const char *string);
