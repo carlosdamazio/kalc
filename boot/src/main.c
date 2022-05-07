@@ -297,8 +297,8 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     Print((CHAR16*) L"Font file loaded.\r\n");
 
     
-    void (*KernelStart)(FrameBuffer*, PSF1_Font*) = ((__attribute__((sysv_abi)) void (*)(FrameBuffer*, PSF1_Font*) ) header.e_entry);
-    KernelStart(buff, font);
+    int (*KernelStart)() = ((__attribute__((sysv_abi)) void (*)() ) header.e_entry);
+	Print((CHAR16*) L"Kernel result: %d\n", KernelStart());
 
     return EFI_SUCCESS;
 }

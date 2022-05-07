@@ -30,7 +30,9 @@ $(BOOTLOADER): |$(BUILDDIR)
 $(KERNEL): |$(BUILDDIR)
 	@echo "[MAKE] Building $@..."
 	$(MAKE) -C $(KERNELDIR)
-	mv $(KERNELDIR)/bin/kernel.elf $(BUILDDIR)
+	cd kernel-rs && cargo build
+	mv ./kernel-rs/target/kernel/debug/kernel-rs $(BUILDDIR)/kernel.elf
+	#mv $(KERNELDIR)/bin/kernel.elf $(BUILDDIR)
 
 $(IMAGE): $(KERNEL) $(BOOTLOADER)
 	@echo "[MAKE] Building $@..."
@@ -49,7 +51,7 @@ $(TARGET): $(IMAGE)
 
 clean:
 	@echo "[MAKE] Cleaning build objects..."
-	@rm -f build/*
+	@rm -rf build/*
 	@$(MAKE) -C $(KERNELDIR) clean
 	@$(MAKE) -C $(EFIDIR) clean
 
