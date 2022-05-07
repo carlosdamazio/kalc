@@ -8,7 +8,7 @@ put_new_line()
     output_cursor.y += 16;
 }
 
-// Draws line to the top of the screen with the desired colour. 
+// draw_line draws line to the top of the screen with the desired colour. 
 void
 draw_line(FrameBuffer *buff, int y, int bpp, unsigned long long colour)
 {
@@ -16,7 +16,7 @@ draw_line(FrameBuffer *buff, int y, int bpp, unsigned long long colour)
         *(unsigned int*)(x + (y * buff->PixelsPerScanLine * bpp) + buff->FrameBufferBase) = colour;
 }
 
-// Prints a single character in a certain colour in x and y offset from the
+// put_char prints a single character in a certain colour in x and y offset from the
 // starting position
 void
 put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour, char chr,
@@ -40,7 +40,7 @@ put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour, char chr,
     }
 }
 
-// Prints a string from the starting cursor position
+// print_string_line prints a string from the starting cursor position
 void
 print_string_line(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
              const char *string)
