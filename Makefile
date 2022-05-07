@@ -29,10 +29,8 @@ $(BOOTLOADER): |$(BUILDDIR)
 
 $(KERNEL): |$(BUILDDIR)
 	@echo "[MAKE] Building $@..."
-	$(MAKE) -C $(KERNELDIR)
-	cd kernel-rs && cargo build
-	mv ./kernel-rs/target/kernel/debug/kernel-rs $(BUILDDIR)/kernel.elf
-	#mv $(KERNELDIR)/bin/kernel.elf $(BUILDDIR)
+	cd kernel && cargo build
+	mv ./kernel/target/kernel/debug/kernel $(BUILDDIR)/kernel.elf
 
 $(IMAGE): $(KERNEL) $(BOOTLOADER)
 	@echo "[MAKE] Building $@..."
