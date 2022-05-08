@@ -1,5 +1,5 @@
 # KalcOS
-A kernel for a REPL calculator.
+A little toy kernel that I'm doing for enjoyment.
 
 ## Rationale
 This is a toy project on how to build an operating system to manage computing resources, not meant to be a full fledged production
