@@ -1,10 +1,10 @@
 LD=ld
 
 ARCH    = x86_64
-TARGET  = main.efi
-SRC     = src/main.c
-OBJ     = src/main.o
-STATIC  = src/main.so
+TARGET  = BOOTx64.efi
+SRCS     = $(wildcard src/*.c)
+OBJS     = $(patsubst %.c, %.o, $(SRCS))
+STATIC  = src/boot.so
 
 EFILIB  = gnu-efi
 EFIINC := $(EFILIB)/inc
@@ -30,14 +30,14 @@ OBJFLAGS = -j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela 
 
 all: $(TARGET)
 
-$(OBJ):
-	$(CC) $(CFLAGS) -c $(SRC) -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(STATIC): $(OBJ)
-	$(LD) $(LDFLAGS) $< -o $@ -lefi -lgnuefi
+$(STATIC): $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@ -lefi -lgnuefi
 
 $(TARGET): $(STATIC)
 	objcopy $(OBJFLAGS) $< $(TARGET)
 
 clean:
-	rm $(OBJ) $(STATIC)
+	rm $(OBJS) $(STATIC)

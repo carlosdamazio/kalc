@@ -2,21 +2,20 @@
 A kernel for a REPL calculator.
 
 ## Rationale
-This is a toy project on how to build a Kernel to manage computing resources, not meant to be a full fledged production
-one. Also this one is to sharpen my C skillzz. There will be a Rust version of this.
+This is a toy project on how to build an operating system to manage computing resources, not meant to be a full fledged production
+one. The bootloader is made in C, while the kernel is written in Rust. Someday, when I have some
+patience to actually refactor the bootloader, it'll be *rustified*.
 
 ## Building and running
 This is what you need in order to build and run this project:
 - Qemu - Emulator for our Kernel.
-- Nasm - Assembler to compile our .asm files.
 - Gcc - The GNU Compiler Collection, to compile our .c files when we make the transition from Assembly to C.
 - make - Automation tool to execute the compiling steps necessary to build the kernel.
-- edk2-ovmf - OVMF shared libraries for executing UEFI applications in QEMU.
-- cdrkit - Contains tool to create ISO files.
+- xorriso - To create our OS image.
 
 Using your favourite package manager, install these dependencies in order to get this thing running:
 ```bash
-$ sudo pacman -S qemu nasm gcc make edk2-ovmf cdrkit
+$ sudo apt install qemu qemu-system-x86 gcc make xorriso
 ```
 After that, clone the gnu-efi repository into the `boot/gnu-efi` folder and build its libraries.
 
