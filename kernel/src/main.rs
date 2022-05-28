@@ -7,6 +7,8 @@ mod output;
 use core::panic::PanicInfo;
 
 use interrupt::idle;
+use output::{FrameBuffer, PSF1Font};
+
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -14,7 +16,7 @@ fn panic(_info: &PanicInfo) -> ! {
 }
 
 #[no_mangle]
-pub extern "C" fn _start() -> ! {
+pub extern "C" fn _start(_buff: &mut FrameBuffer, _font: &mut PSF1Font) -> ! {
     loop {
         idle();
     }
