@@ -15,7 +15,11 @@ This is what you need in order to build and run this project:
 
 Using your favourite package manager, install these dependencies in order to get this thing running:
 ```bash
-$ sudo apt install qemu qemu-system-x86 gcc make xorriso
+sudo apt install qemu qemu-system-x86 gcc make xorriso curl
+
+# Install Rust's nightly version
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
 ```
 After that, clone the gnu-efi repository into the `boot/gnu-efi` folder and build its libraries.
 
