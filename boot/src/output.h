@@ -18,8 +18,5 @@ typedef struct {
 
 FrameBuffer* NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop);
 EFI_GRAPHICS_OUTPUT_PROTOCOL* GetGOP();
-EnhancedVideoModeInfo* GetVideoModesInfo(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop);
-void PrintVideoModesInfo(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, 
-		EnhancedVideoModeInfo *einfo);
 FrameBuffer* GetFrameBufferFromMode(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, UINTN mode);
 

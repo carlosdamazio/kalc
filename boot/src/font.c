@@ -10,7 +10,6 @@ GetPSF1Header(EFI_FILE *font)
 		UINTN header_size = sizeof(PSF1_Header);
 		uefi_call_wrapper(font->Read, 3, font, &header_size, header);
 	}
-	
 	return header;
 }
 
@@ -39,14 +38,14 @@ ValidatePSF1Header(PSF1_Header *header)
 PSF1_Font*
 LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
 {
-	EFI_FILE *font = LoadFile(Directory, Path, ImageHandle); 
+	EFI_FILE *font = LoadFile(Directory, Path, ImageHandle);
 	if (font == NULL) {
 		Print((CHAR16*) L"Font not loaded.\r\n");
 		return NULL;
 	}
 
 	PSF1_Header *header = GetPSF1Header(font);
-	if (ValidatePSF1Header(header)) 
+	if (ValidatePSF1Header(header))
 		return NULL;
 
 	UINTN glyph_buffer_size = header->charsize * 256;

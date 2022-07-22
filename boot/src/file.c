@@ -19,7 +19,7 @@ GetElfHeader(EFI_FILE *file)
 	static Elf64_Ehdr header;
 	UINTN size = sizeof(header);
 	uefi_call_wrapper(file->Read, 3, file, &size, &header);
-	return &header; 
+	return &header;
 }
 
 // GetProgramHeaders returns a sequence of ELF program headers from file
@@ -29,7 +29,7 @@ GetProgramHeaders(EFI_FILE *file, Elf64_Ehdr *header)
 	Elf64_Phdr *phdrs;
 	uefi_call_wrapper(file->SetPosition, 2, file, header->e_phoff);
 	UINTN size = header->e_phnum * header->e_phentsize;
-	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, size, 
+	uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, size,
 			(void **)&phdrs);
 	uefi_call_wrapper(file->Read, 3, file, &size, phdrs);
 	return phdrs;
