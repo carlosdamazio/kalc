@@ -2,11 +2,8 @@
 #include <efilib.h>
 #include <elf.h>
 
-static EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs_protocol;
-static EFI_LOADED_IMAGE_PROTOCOL       *loaded_image;
-
-EFI_FILE*   LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image);
-Elf64_Phdr* GetProgramHeaders(EFI_FILE *file, Elf64_Ehdr *header);
-Elf64_Ehdr* GetElfHeader(EFI_FILE *file);
-void        AllocateSegments(EFI_FILE *file, Elf64_Phdr *phdrs, Elf64_Ehdr *header);
-int         IsValidElfHeader(Elf64_Ehdr *header);
+EFI_FILE*   load_file(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image);
+Elf64_Phdr* get_program_headers(EFI_FILE *file, Elf64_Ehdr *header);
+Elf64_Ehdr* get_elf_header(EFI_FILE *file);
+void        allocate_segments(EFI_FILE *file, Elf64_Phdr *phdrs, Elf64_Ehdr *header);
+int         is_valid_elf_header(Elf64_Ehdr *header);

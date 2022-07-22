@@ -10,11 +10,11 @@ typedef struct {
 	unsigned char magic[2];
 	unsigned char mode;
 	unsigned char charsize;
-} PSF1_Header;
+} PSF1_header;
 
 typedef struct {
-	PSF1_Header *psf_header;
+	PSF1_header *psf_header;
 	void        *glyph_buffer;
-} PSF1_Font;
+} PSF1_font;
 
-PSF1_Font* LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle);
+PSF1_font* load_font(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle);

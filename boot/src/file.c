@@ -1,10 +1,14 @@
 #include "file.h"
+#include "utils.h"
 
-// IsValidElfHeader validates an ELF header
+static EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs_protocol;
+static EFI_LOADED_IMAGE_PROTOCOL       *loaded_image;
+
+// is_valid_elf_header() validates an ELF header
 int
-IsValidElfHeader(Elf64_Ehdr *header)
+is_valid_elf_header(Elf64_Ehdr *header)
 {
-	return mem_cmp(&header->e_ident[EI_MAG0], ELFMAG, SELFMAG) != 0 ||
+	return memcmp(&header->e_ident[EI_MAG0], ELFMAG, SELFMAG) != 0 ||
 		header->e_ident[EI_CLASS] != ELFCLASS64                     ||
 		header->e_ident[EI_DATA] != ELFDATA2LSB                     ||
 		header->e_type != ET_EXEC                                   ||
@@ -12,9 +16,9 @@ IsValidElfHeader(Elf64_Ehdr *header)
 		header->e_version != EV_CURRENT;
 }
 
-// GetElfHeader returns an ELF header from file
+// get_elf_header() returns an ELF header from file
 Elf64_Ehdr*
-GetElfHeader(EFI_FILE *file)
+get_elf_header(EFI_FILE *file)
 {
 	static Elf64_Ehdr header;
 	UINTN size = sizeof(header);
@@ -22,9 +26,9 @@ GetElfHeader(EFI_FILE *file)
 	return &header;
 }
 
-// GetProgramHeaders returns a sequence of ELF program headers from file
+// get_program_headers() returns a sequence of ELF program headers from file
 Elf64_Phdr*
-GetProgramHeaders(EFI_FILE *file, Elf64_Ehdr *header)
+get_program_headers(EFI_FILE *file, Elf64_Ehdr *header)
 {
 	Elf64_Phdr *phdrs;
 	uefi_call_wrapper(file->SetPosition, 2, file, header->e_phoff);
@@ -35,9 +39,9 @@ GetProgramHeaders(EFI_FILE *file, Elf64_Ehdr *header)
 	return phdrs;
 }
 
-// AllocateSegments allocates loadable program headers from file to memory
+// allocate_segments() allocates loadable program headers from file to memory
 void
-AllocateSegments(EFI_FILE *file, Elf64_Phdr *phdrs, Elf64_Ehdr *header)
+allocate_segments(EFI_FILE *file, Elf64_Phdr *phdrs, Elf64_Ehdr *header)
 {
     for (Elf64_Phdr *phdr = phdrs;
 			(char *)phdr < (char *)phdrs + header->e_phnum * header->e_phentsize;
@@ -59,9 +63,9 @@ AllocateSegments(EFI_FILE *file, Elf64_Phdr *phdrs, Elf64_Ehdr *header)
 	}
 }
 
-// LoadFile retrieves a file from the FS, even if SFS is not mounted yet
+// load_file() retrieves a file from the FS, even if SFS is not mounted yet
 EFI_FILE*
-LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
+load_file(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
 {
 	EFI_FILE *LoadedFile;
 

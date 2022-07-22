@@ -1,0 +1,70 @@
+[
+ {
+  "directory": "/home/damazio/repos/carlosdamazio/KalcOS/boot",
+  "arguments": [
+   "cc",
+   "-Ignu-efi/inc",
+   "-fno-stack-protector",
+   "-fpic",
+   "-fshort-wchar",
+   "-mno-red-zone",
+   "-Wall",
+   "-c",
+   "src/file.c",
+   "-o",
+   "src/file.o"
+  ],
+  "file": "src/file.c"
+ },
+ {
+  "directory": "/home/damazio/repos/carlosdamazio/KalcOS/boot",
+  "arguments": [
+   "cc",
+   "-Ignu-efi/inc",
+   "-fno-stack-protector",
+   "-fpic",
+   "-fshort-wchar",
+   "-mno-red-zone",
+   "-Wall",
+   "-c",
+   "src/output.c",
+   "-o",
+   "src/output.o"
+  ],
+  "file": "src/output.c"
+ },
+ {
+  "directory": "/home/damazio/repos/carlosdamazio/KalcOS/boot",
+  "arguments": [
+   "cc",
+   "-Ignu-efi/inc",
+   "-fno-stack-protector",
+   "-fpic",
+   "-fshort-wchar",
+   "-mno-red-zone",
+   "-Wall",
+   "-c",
+   "src/font.c",
+   "-o",
+   "src/font.o"
+  ],
+  "file": "src/font.c"
+ },
+ {
+  "directory": "/home/damazio/repos/carlosdamazio/KalcOS/boot",
+  "arguments": [
+   "cc",
+   "-Ignu-efi/inc",
+   "-fno-stack-protector",
+   "-fpic",
+   "-fshort-wchar",
+   "-mno-red-zone",
+   "-Wall",
+   "-c",
+   "src/main.c",
+   "-o",
+   "src/main.o"
+  ],
+  "file": "src/main.c"
+ }
+]
