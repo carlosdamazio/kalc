@@ -54,6 +54,7 @@ efi_main (EFI_HANDLE image, EFI_SYSTEM_TABLE *st)
 
 	Print((CHAR16*) L"[BOOT] Handing over the runtime to the kernel\r\n");
 	entry(buff, font);
+
 	return EFI_SUCCESS;
 }
 

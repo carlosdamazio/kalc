@@ -7,16 +7,23 @@ mod output;
 use core::panic::PanicInfo;
 
 use interrupt::idle;
-use output::{FrameBuffer, PSF1Font};
+use output::{FrameBuffer, Projector, PSF1Font};
 
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+    loop {
+        idle();
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn _start(_buff: &mut FrameBuffer, _font: &mut PSF1Font) -> ! {
+pub extern "C" fn _start(buff: &mut FrameBuffer, font: &mut PSF1Font) -> ! {
+    unsafe {
+        let mut projector = Projector { buff, font };
+        projector.kprint("Hello, world!".chars());
+    }
+
     loop {
         idle();
     }

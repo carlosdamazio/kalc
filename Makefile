@@ -39,14 +39,14 @@ $(KERNEL): |$(BUILDDIR)
 
 $(IMAGE): $(KERNEL) $(BOOTLOADER)
 	@echo "[MAKE] Building $@..."
-	dd if=/dev/zero of=$(IMAGE) bs=1M count=50
-	mformat -i $(IMAGE) -f 1440
+	dd if=/dev/zero of=$(IMAGE) bs=50M count=1
+	sudo mkfs.vfat -F32 $(IMAGE)
 	mmd -i $@ ::/EFI
 	mmd -i $@ ::/EFI/BOOT
 	mcopy -i $@ $(BOOTLOADER) ::/EFI/BOOT
 	mcopy -i $@ $(KERNEL) ::
 	mcopy -i $@ $(FONT) ::
-		
+
 $(TARGET): $(IMAGE)
 	@echo "[MAKE] Building $@..."
 	$(MKISOFS) -o $@ -iso-level 3 -V "UEFI" $(IMAGE) -e /$(OS).img -no-emul-boot
@@ -59,4 +59,4 @@ clean:
 
 run: $(TARGET)
 	@echo "[MAKE] Running QEMU..."
-	@$(QEMU) $(QEMUARGS) 
+	@$(QEMU) $(QEMUARGS)
