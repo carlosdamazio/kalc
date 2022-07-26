@@ -1,7 +1,19 @@
-#include "output.h"
+#include "boot.h"
 
-void _start(FrameBuffer *buff, PSF1_Font *font)
+void
+initialize_graphics(BootInfo *boot)
 {
-    draw_line(buff, 50, 4, 0xffffffff);
-    for (;;) {}
+	Renderer.framebuffer = boot->framebuffer;
+	Renderer.font        = boot->psf1_font;
+	Renderer.cursor      = (OutputCursor) {
+		.x = 0,
+		.y = 0
+	};
+}
+
+void _start(BootInfo *boot)
+{
+	initialize_graphics(boot);
+	kprint(0xffffffff, "Hello, world");
+	for (;;) {}
 }
