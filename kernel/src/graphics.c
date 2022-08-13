@@ -1,4 +1,4 @@
-#include "output.h"
+#include "graphics.h"
 
 // Changes cursor line
 void
@@ -8,7 +8,7 @@ put_new_line()
     output_cursor.y += 16;
 }
 
-// Draws line to the top of the screen with the desired colour. 
+// Draws line to the top of the screen with the desired colour.
 void
 draw_line(FrameBuffer *buff, int y, int bpp, unsigned long long colour)
 {
@@ -29,7 +29,7 @@ put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour, char chr,
     for (unsigned long y = y_offset; y < y_offset + 16; y++) {
         for (unsigned long x = x_offset; x < x_offset + 8; x++) {
             // This checks if current font hex value in the bitmap
-            // is greater than 0 through masking 1 bit value shifted 
+            // is greater than 0 through masking 1 bit value shifted
             // x - x_offset times so it knows when to fill the address with
             // the colour value.
             if ((*font & (0b10000000 >> (x - x_offset))) > 0)
@@ -42,8 +42,8 @@ put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour, char chr,
 
 // Prints a string from the starting cursor position
 void
-print_string_line(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
-             const char *string)
+kprintln(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
+                  const char *string)
 {
     char *chr = (char*) string;
     while (*chr != 0) {
@@ -53,8 +53,16 @@ print_string_line(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
         if (output_cursor.x + 8 > buff->HorizontalRes)
             put_new_line();
         chr++;
-    } 
+    }
     // Jump to next line
     put_new_line();
 }
 
+// clear cleans the screen
+void
+clear(FrameBuffer *buff)
+{
+    unsigned int *pixel = (unsigned int*) buff->FrameBufferBase;
+    for (unsigned long long i = 0; i < buff->HorizontalRes * buff->VerticalRes; i++)
+        *(unsigned int *)(pixel + i) = 0x00000000;
+}
