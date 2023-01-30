@@ -1,39 +1,20 @@
-#![no_std]
-#![no_main]
-extern crate bootloader_api;
-extern crate bootloader_x86_64_common;
+// src/main.rs
 
-use bootloader_api::{
-    config::{FrameBuffer, Mapping, Mappings},
-    info::{FrameBufferInfo, MemoryRegions},
-    *,
-};
-use bootloader_x86_64_common::logger::{LockedLogger, LOGGER};
+fn main() {
+    // read env variables that were set in build script
+    let uefi_path = env!("UEFI_PATH");
+    let bios_path = env!("BIOS_PATH");
 
-use core::panic::PanicInfo;
+    // choose whether to start the UEFI or BIOS image
+    let uefi = true;
 
-// bootloader config
-const CONFIG: bootloader_api::BootloaderConfig = {
-    let mut config = bootloader_api::BootloaderConfig::new_default();
-    config.kernel_stack_size = 100 * 1024;
-    config
-};
-entry_point!(_start, config = &CONFIG);
-
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
-
-fn _start(boot_info: &'static mut bootloader_api::BootInfo) -> ! {
-    let mut framebuffer = boot_info
-        .framebuffer
-        .as_mut()
-        .unwrap()
-        .buffer_mut();
-    loop {
-        unsafe {
-            core::arch::asm!("hlt");
-        }
+    let mut cmd = std::process::Command::new("qemu-system-x86_64");
+    if uefi {
+        cmd.arg("-bios").arg(ovmf_prebuilt::ovmf_pure_efi());
+        cmd.arg("-drive").arg(format!("format=raw,file={uefi_path}"));
+    } else {
+        cmd.arg("-drive").arg(format!("format=raw,file={bios_path}"));
     }
+    let mut child = cmd.spawn().unwrap();
+    child.wait().unwrap();
 }

@@ -1,24 +1,19 @@
-cargo-features = ["per-package-target"]
-
 [package]
 name = "kalcos"
 version = "0.1.0"
-forced-target = "x86_64-unknown-none"
 
-[workspace]
-members = ["exec"]
+[build-dependencies]
+bootloader = "0.11.0"
+kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }
 
 [dependencies]
-bootloader-x86_64-common = { git = "https://github.com/rust-osdev/bootloader", version = "0.11.0" }
-bootloader_api = { git = "https://github.com/rust-osdev/bootloader", version = "0.11.0" }
+ovmf-prebuilt = "0.1.0-alpha.1"
+
+[workspace]
+members = ["kernel"]
 
 [profile.dev]
 panic = "abort"
 
 [profile.release]
 panic = "abort"
-debug = true
-debug-assertions = true
-overflow-checks = true
-incremental = true
-codegen-units = 256
