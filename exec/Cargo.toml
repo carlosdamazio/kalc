@@ -1,0 +1,11 @@
+[package]
+name = "exec"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+kalcos = { path = "..", artifact = "bin", target = "x86_64-unknown-none" }
+bootloader = { git = "https://github.com/rust-osdev/bootloader", version = "0.11.0", default-features = false, features = ["uefi"] }
+bootloader-x86_64-uefi = { git = "https://github.com/rust-osdev/bootloader", version = "0.11.0", artifact = "bin", target = "x86_64-unknown-uefi" }
