@@ -1,7 +1,8 @@
-#include "output.h"
+#include "boot.h"
 
-void _start(FrameBuffer *buff, PSF1_Font *font)
+void _start(BootInfo *boot)
 {
-    draw_line(buff, 50, 4, 0xffffffff);
-    for (;;) {}
+    clear(boot->framebuffer);
+    kprintln(boot->framebuffer, boot->psf1_font, 0xFFFFFFFF, "Hello, world!");
+    __asm__("hlt");
 }

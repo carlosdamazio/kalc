@@ -21,9 +21,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 $(TARGET):
 	@echo "[MAKE] Linking into ELF file..."
-	$(LD) $(LDFLAGS) -o $(BINDIR)/$(TARGET) $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $(BINDIR)/$(TARGET)
 
-clean: $(OBJS)
+clean:
 	rm -f $(OBJDIR)/*
 	rm -f $(BINDIR)/*
 
