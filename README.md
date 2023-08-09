@@ -34,3 +34,6 @@ $ sudo make run
 ```
 
 This will generate the `KalcOS.iso` file in `build/` directory, of which is the image to be ran on QEMU.
+
+To see what's going to be developed, please refer to the TODO.md file in root directory folder
+or check the issues tab in GitHub repo.
