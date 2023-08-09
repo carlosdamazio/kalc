@@ -9,12 +9,12 @@ typedef struct {
     unsigned char magic[2];
     unsigned char mode;
     unsigned char charsize;
-} PSF_Header;
+} PSF1_Header;
 
 typedef struct {
-    PSF_Header* psf_header;
-    void* glyph_buffer;
-} PSF_Font;
+    PSF1_Header *psf_header;
+    void       *glyph_buffer;
+} PSF1_Font;
 
 typedef struct {
     void          *FrameBufferBase;
@@ -31,12 +31,13 @@ typedef struct {
     UINTN num_modes;
 } EnhancedVideoModeInfo;
 
-
-FrameBuffer buff;
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs_protocol;
+EFI_LOADED_IMAGE_PROTOCOL       *loaded_image;
 
 FrameBuffer*
 NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop)
 {
+    static FrameBuffer buff;
     buff.FrameBufferBase   = (void*) gop->Mode->FrameBufferBase;
     buff.FrameBufferSize   = (unsigned long) gop->Mode->FrameBufferSize;
     buff.HorizontalRes     = (unsigned int)  gop->Mode->Info->HorizontalResolution;
@@ -49,7 +50,7 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL*
 GetGOP()
 {
     EFI_GUID gopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
-    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
 
     EFI_STATUS status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopGuid, NULL,
                                           (void **)&gop);
@@ -126,20 +127,20 @@ int mem_cmp(const void *aptr, const void *bptr, int n)
 EFI_FILE
 *LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
 {
-    EFI_FILE *LoadedFile = NULL;
-    EFI_LOADED_IMAGE_PROTOCOL *LoadedImage = NULL;
-    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem = NULL;
+    EFI_FILE *LoadedFile;
     EFI_GUID EfiImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
     EFI_GUID EfiSimpleFsProtocolGuid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
 
-    // Load everything
-    uefi_call_wrapper(BS->HandleProtocol, 3, Image, &EfiImageProtocolGuid,
-            (void **)&LoadedImage);
-    uefi_call_wrapper(BS->HandleProtocol, 3, LoadedImage->DeviceHandle,
-            &EfiSimpleFsProtocolGuid, (void **)&FileSystem);
-    
+    if (loaded_image == NULL || fs_protocol == NULL) {
+        uefi_call_wrapper(BS->HandleProtocol, 3, Image, &EfiImageProtocolGuid,
+                (void **)&loaded_image);
+        uefi_call_wrapper(BS->HandleProtocol, 3, loaded_image->DeviceHandle,
+                &EfiSimpleFsProtocolGuid, (void **)&fs_protocol);
+    }
+
+    // Open root directory from volume
     if (Directory == NULL)
-        uefi_call_wrapper(FileSystem->OpenVolume, 2, FileSystem, &Directory);
+        uefi_call_wrapper(fs_protocol->OpenVolume, 2, fs_protocol, &Directory);
 
     EFI_STATUS ret = uefi_call_wrapper(Directory->Open, 5, Directory,
             &LoadedFile, Path, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY);
@@ -150,7 +151,8 @@ EFI_FILE
     return LoadedFile;
 }
 
-PSF_Font*
+
+PSF1_Font*
 LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
 {
     EFI_FILE *font = LoadFile(Directory, Path, ImageHandle); 
@@ -159,19 +161,18 @@ LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
         return NULL;
     }
     Print((CHAR16*) L"Loaded font file.\r\n");
-    PSF_Header *header;
-    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF_Header),
-            (void **) &header);
-    UINTN header_size = sizeof(PSF_Header);
-    font->Read(font, &header_size, header);
-
+    PSF1_Header *header;
+    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Header), (void **)&header);
+    UINTN header_size = sizeof(PSF1_Header);
+    uefi_call_wrapper(font->Read, 3, font, &header_size, header);
+    
     if (header->magic[0] != PSF_MAGIC0 || header->magic[1] != PSF_MAGIC1) {
         Print((CHAR16*) L"Magic 0: %x\r\n", header->magic[0]);
         Print((CHAR16*) L"Magic 1: %x\r\n", header->magic[1]);
         Print((CHAR16*) L"File has invalid magic number in header.\r\n");
         return NULL;
     }
-
+    
     UINTN glyph_buffer_size = header->charsize * 256;
     if (header->mode == 1) {
         glyph_buffer_size = header->charsize * 512;
@@ -179,14 +180,14 @@ LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
     
     void *glyph_buffer;
     {
-        font->SetPosition(font, sizeof(PSF_Header));
+        uefi_call_wrapper(font->SetPosition, 2, font, sizeof(PSF1_Header));
         uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, glyph_buffer_size,
                 (void **) &glyph_buffer);
-        font->Read(font, &glyph_buffer_size, glyph_buffer);
+        uefi_call_wrapper(font->Read, 3, font, &glyph_buffer_size, glyph_buffer);
     }
 
-    PSF_Font *built_font;
-    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF_Font),
+    PSF1_Font *built_font;
+    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Font),
                 (void **) &built_font);
     built_font->psf_header = header;
     built_font->glyph_buffer = glyph_buffer;
@@ -279,7 +280,7 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     FrameBuffer *buff = NewFrameBuffer(gop);
     Print((CHAR16*) L"Got framebuffer.\r\n");
 
-    PSF_Font *font = LoadFont(NULL, (CHAR16*)L"zap-light16.psf", Image);
+    PSF1_Font *font = LoadFont(NULL, (CHAR16 *) L"zap-light16.psf", Image);
     if (font == NULL) {
         Print((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
         return EFI_ERROR((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
