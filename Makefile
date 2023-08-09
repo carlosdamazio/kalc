@@ -9,12 +9,17 @@ KERNELDIR := kernel
 BUILDDIR := build
 
 KERNEL     := $(BUILDDIR)/kernel.elf
-BOOTLOADER := $(BUILDDIR)/main.efi
+BOOTLOADER := $(BUILDDIR)/BOOTx64.efi
 IMAGE 	   := $(BUILDDIR)/$(OS).img
 TARGET 	   := $(BUILDDIR)/$(OS).iso
 FONT   	   := ./zap-light16.psf
 
-QEMUARGS := -drive file=$(TARGET) -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none -vga cirrus
+QEMUARGS := -drive file=$(TARGET) \
+			-m 256M \
+			-cpu qemu64 \
+			-drive if=pflash,format=raw,unit=0,file="./OVMF_CODE.fd",readonly=on \
+			-net none \
+			-vga cirrus
 
 all: $(TARGET)
 
@@ -25,7 +30,7 @@ $(BUILDDIR):
 $(BOOTLOADER): |$(BUILDDIR)
 	@echo "[MAKE] Building $@..."
 	$(MAKE) -C $(EFIDIR)
-	@mv $(EFIDIR)/main.efi $@
+	@mv $(EFIDIR)/BOOTx64.efi $@
 
 $(KERNEL): |$(BUILDDIR)
 	@echo "[MAKE] Building $@..."
@@ -35,17 +40,17 @@ $(KERNEL): |$(BUILDDIR)
 $(IMAGE): $(KERNEL) $(BOOTLOADER)
 	@echo "[MAKE] Building $@..."
 	dd if=/dev/zero of=$(IMAGE) bs=1M count=50
-	mformat -i $(IMAGE) -f 1440
+	mkfs.vfat $(IMAGE)
 	mmd -i $@ ::/EFI
 	mmd -i $@ ::/EFI/BOOT
 	mcopy -i $@ $(BOOTLOADER) ::/EFI/BOOT
-	mcopy -i $@ $(EFIDIR)/startup.nsh :: 
+	mcopy -i $@ $(EFIDIR)/startup.nsh ::
 	mcopy -i $@ $(KERNEL) ::
 	mcopy -i $@ $(FONT) ::
-		
+
 $(TARGET): $(IMAGE)
 	@echo "[MAKE] Building $@..."
-	$(MKISOFS) -o $@ -iso-level 3 -V "UEFI" $(IMAGE) -e /$(OS).img -no-emul-boot	
+	$(MKISOFS) -o $@ -iso-level 3 -V "UEFI" $(IMAGE) -e /$(OS).img -no-emul-boot
 
 clean:
 	@echo "[MAKE] Cleaning build objects..."
@@ -55,4 +60,4 @@ clean:
 
 run: $(TARGET)
 	@echo "[MAKE] Running QEMU..."
-	@$(QEMU) $(QEMUARGS) 
+	@$(QEMU) $(QEMUARGS)

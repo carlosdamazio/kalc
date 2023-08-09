@@ -10,7 +10,7 @@ endif
 if exist fs0:\efi\boot\main.efi then
  fs0:
  echo Found bootloader on fs0:
- efi\boot\main.efi
+ .\efi\boot\main.efi
  goto END
 endif
 
