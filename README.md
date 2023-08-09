@@ -1,4 +1,4 @@
-# kalc
+# KalcOS
 A kernel for a REPL calculator.
 
 ## Rationale
