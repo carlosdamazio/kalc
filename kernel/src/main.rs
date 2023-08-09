@@ -38,8 +38,8 @@ fn _start(boot_info: &'static mut bootloader_api::BootInfo) -> ! {
         .unwrap();
     let framebuffer_info: FrameBufferInfo = framebuffer.info().clone();
 
-    klogger::klog(framebuffer.buffer_mut(), framebuffer_info);
-    info!("Hello, world!");
+    klogger::init(framebuffer.buffer_mut(), framebuffer_info);
+    info!("KalcOS v0.1.0");
 
     loop {
         unsafe {
