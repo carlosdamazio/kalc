@@ -2,6 +2,20 @@
 #include <efilib.h>
 #include <elf.h>
 
+#define PSF_MAGIC0 0x36
+#define PSF_MAGIC1 0x04
+
+typedef struct { 
+    unsigned char magic[2];
+    unsigned char mode;
+    unsigned char charsize;
+} PSF_Header;
+
+typedef struct {
+    PSF_Header* psf_header;
+    void* glyph_buffer;
+} PSF_Font;
+
 typedef struct {
     void          *FrameBufferBase;
     unsigned long FrameBufferSize;
@@ -109,7 +123,8 @@ int mem_cmp(const void *aptr, const void *bptr, int n)
     return 0;
 }
 
-EFI_FILE *LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
+EFI_FILE
+*LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
 {
     EFI_FILE *LoadedFile = NULL;
     EFI_LOADED_IMAGE_PROTOCOL *LoadedImage = NULL;
@@ -135,6 +150,45 @@ EFI_FILE *LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
     return LoadedFile;
 }
 
+PSF_Font*
+LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
+{
+    EFI_FILE *font = LoadFile(Directory, Path, ImageHandle); 
+    if (font == NULL)
+        return NULL;
+    Print((CHAR16*) L"Loaded font file.");
+    PSF_Header *header;
+    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF_Header),
+            (void **) &header);
+    UINTN header_size = sizeof(PSF_Header);
+    font->Read(font, &header_size, header);
+
+    if (header->magic[0] != PSF_MAGIC0 || header->magic[1] != PSF_MAGIC1) {
+        Print((CHAR16*) L"File has invalid magic number in header.");
+        return NULL;
+    }
+
+    UINTN glyph_buffer_size = header->charsize * 256;
+    if (header->mode == 1) {
+        glyph_buffer_size = header->charsize * 512;
+    }
+    
+    void *glyph_buffer;
+    {
+        font->SetPosition(font, sizeof(PSF_Header));
+        uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, glyph_buffer_size,
+                (void **) &glyph_buffer);
+        font->Read(font, &glyph_buffer_size, glyph_buffer);
+    }
+
+    PSF_Font *built_font;
+    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF_Font),
+                (void **) &built_font);
+    built_font->psf_header = header;
+    built_font->glyph_buffer = glyph_buffer;
+    return built_font;
+}
+
 EFI_STATUS
 EFIAPI
 efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
@@ -142,15 +196,16 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     InitializeLib(Image, SystemTable);
 
     CHAR16   *KernelName = (CHAR16 *)L"kernel.elf";
-    EFI_FILE *Kernel = NULL;
+    EFI_FILE *Kernel;
     EFI_GUID FileInfoGuid = EFI_FILE_INFO_ID;
     
     // Load kernel file
     Kernel = LoadFile(NULL, KernelName, Image);
 
-    if (Kernel == NULL)
+    if (Kernel == NULL) {
         Print((CHAR16 *)L"Kernel file couldn't be loaded\r\n");
-    else
+        return EFI_ERROR((CHAR16 *)L"Kernel file couldn't be loaded\r\n"); 
+    } else
         Print((CHAR16 *)L"Kernel file loaded successfully\r\n");
 
     // Get ELF header and validate it
@@ -220,6 +275,14 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     FrameBuffer *buff = NewFrameBuffer(gop);
     Print((CHAR16*) L"Got framebuffer.\r\n");
 
+    PSF_Font *font = LoadFont(NULL, (CHAR16*)"zap-vga16.psf", Image);
+    if (font == NULL) {
+        Print((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
+        return EFI_ERROR((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
+    }
+    Print((CHAR16*) L"Font file loaded.\r\n");
+
+    
     unsigned int (*KernelStart)(FrameBuffer*) = ((__attribute__((sysv_abi)) unsigned int (*)(FrameBuffer*) ) header.e_entry);
     Print((CHAR16*)L"Kernel result = %u\n", KernelStart(buff));
 
