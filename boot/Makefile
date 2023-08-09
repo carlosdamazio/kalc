@@ -15,15 +15,15 @@ OBJFLAGS=-j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j
 		 --target efi-app-x86_64 --subsystem=10
 
 
-all: boot.efi
+all: $(TARGET)
 
-boot.o:
+$(OBJ):
 	$(CC) $(CFLAGS) -c $(SRC) -o $(OBJ)
 
-boot.so: boot.o
+$(STATIC): $(OBJ)
 	$(LD) $(LDFLAGS) $(OBJ) -o $(STATIC)
 
-boot.efi: boot.so
+$(TARGET): $(STATIC)
 	objcopy $(OBJFLAGS) $(STATIC) $(TARGET)
 
 clean:
