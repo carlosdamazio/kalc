@@ -11,9 +11,8 @@ This is what you need in order to build and run this project:
 - make
 - qemu
 
-Using make, just run the application and then clean up everything with:
+Using make, build the boot loader and kernel by running:
 ```bash
-$ make all
+$ make
 ```
-This is used to generate a binary, but this is application level. When I progress in building a kernel, the building
-phase is going to be totally changed.
+This will generate the `boot.efi` file that will be used as a boot loader for our kernel.
