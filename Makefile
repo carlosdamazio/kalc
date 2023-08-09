@@ -1,4 +1,4 @@
-.PHONY: build clean
+.PHONY: run clean
 
 CFLAGS=-Wall -Werror --std=c11 -pedantic
 SRC=src/*.c
