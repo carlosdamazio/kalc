@@ -23,6 +23,7 @@ After that, clone the gnu-efi repository into the `boot/gnu-efi` folder and buil
 ```bash
 $ mkdir boot
 $ git clone https://git.code.sf.net/p/gnu-efi/code boot/gnu-efi
+$ make -C boot/gnu-efi
 ```
 
 Using `make`, build the boot loader and kernel by running. To get it running, run `make run` with sudo
