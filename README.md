@@ -1,6 +1,3 @@
-# KalcOS
-A kernel for a REPL calculator.
-
 ## Rationale
 This is a toy project on how to build a Kernel to manage computing resources, not meant to be a full fledged production
 one. Also this one is to sharpen my C skillzz. There will be a Rust version of this.
