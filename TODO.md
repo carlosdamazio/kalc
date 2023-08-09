@@ -2,7 +2,8 @@
 - [x] TODO: Project setup for UEFI support.
 - [ ] TODO: BIOS support for boot loader.
 - [x] TODO: UEFI support for boot loader.
-- [ ] TODO: load and execute our kernel code into the boot loader code.
+- [x] TODO: load and execute our kernel code into the boot loader code.
+- [ ] TODO: Multi-kernel boot loader.
 - [ ] TODO: filesystem support to handle the calculator's code and its files.
 - [ ] TODO: Basic memory management mechanism.
 - [ ] TODO: Output characters into screen.

@@ -21,13 +21,12 @@ $ sudo pacman -S qemu nasm gcc make edk2-ovmf cdrkit
 After that, clone the gnu-efi repository into the `boot/gnu-efi` folder and build its libraries.
 
 ```bash
-$ mkdir boot
 $ git clone https://git.code.sf.net/p/gnu-efi/code boot/gnu-efi
 $ make -C boot/gnu-efi
 ```
 
-Using `make`, build the boot loader and kernel by running. To get it running, run `make run` with sudo
-because of the OVMF libraries being located in a folder owned by root:
+Using `make`, build the boot loader and kernel by running `make` and `make run` with sudo to execute
+the image in QEMU, because of the OVMF libraries being located in a folder owned by root:
 ```bash
 $ make
 $ sudo make run
