@@ -293,8 +293,8 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     Print((CHAR16*) L"Font file loaded.\r\n");
 
     
-    unsigned int (*KernelStart)(FrameBuffer*) = ((__attribute__((sysv_abi)) unsigned int (*)(FrameBuffer*) ) header.e_entry);
-    Print((CHAR16*)L"Kernel result = %u\n", KernelStart(buff));
+    void (*KernelStart)(FrameBuffer*, PSF1_Font*) = ((__attribute__((sysv_abi)) void (*)(FrameBuffer*, PSF1_Font*) ) header.e_entry);
+    KernelStart(buff, font);
 
     return EFI_SUCCESS;
 }
