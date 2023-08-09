@@ -6,6 +6,11 @@
 #endif
 
 typedef struct {
+    unsigned int x;
+    unsigned int y;
+} OutputCursor;
+
+typedef struct {
     void          *base;
     unsigned long size;
     unsigned int  x_resolution;

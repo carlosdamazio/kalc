@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_H
-#define GRAPHICS_H
+#ifndef OUTPUT_H
+#define OUTPUT_H
 
 typedef struct {
     unsigned char magic[2];
@@ -8,16 +8,16 @@ typedef struct {
 } PSF1_Header;
 
 typedef struct {
-    PSF1_Header *header;
-    void        *glyph_buffer;
+    PSF1_Header *psf_header;
+    void       *glyph_buffer;
 } PSF1_Font;
 
 typedef struct {
-    void          *base;
-    unsigned long size;
-    unsigned int  x_resolution;
-    unsigned int  y_resolution;
-    unsigned int  ppsl;
+    void          *FrameBufferBase;
+    unsigned long FrameBufferSize;
+    unsigned int  HorizontalRes;
+    unsigned int  VerticalRes;
+    unsigned int  PixelsPerScanLine;
 } FrameBuffer;
 
 typedef struct {
@@ -25,17 +25,12 @@ typedef struct {
     unsigned int y;
 } OutputCursor;
 
-typedef struct {
-	OutputCursor cursor;
-	PSF1_Font    *font;
-	FrameBuffer  *framebuffer;
-} GraphicsRenderer;
+static OutputCursor output_cursor = {.x = 0, .y = 0};
 
-static GraphicsRenderer Renderer;
-
-void clear();
 void draw_line(FrameBuffer *buff, int y, int bpp, unsigned long long colour);
-void start_renderer(GraphicsRenderer *renderer, PSF1_Font *font, FrameBuffer *framebuffer);
-void kprint(unsigned int colour, const char *string);
-
+void put_char(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
+              char chr, unsigned int x_offset, unsigned int y_offset);
+void kprintln(FrameBuffer *buff, PSF1_Font *psf1_font, unsigned int colour,
+                       const char *string);
+void clear(FrameBuffer *buff);
 #endif
