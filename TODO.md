@@ -1,13 +1,13 @@
-[x] TODO: Project setup for BIOS support.
-[x] TODO: Project setup for UEFI support.
-[] TODO: BIOS support for boot loader.
-[x] TODO: UEFI support for boot loader.
-[] TODO: load and execute our kernel code into the boot loader code.
-[] TODO: filesystem support to handle the calculator's code and its files.
-[] TODO: Basic memory management mechanism.
-[] TODO: Output characters into screen.
-[] TODO: I/O events for Keyboard input.
-[] TODO: Simple REPL program to read user input, evaluate the expression and return output to screen.
-[] TODO: Build `tokenizer` to lex, and `parser` to parse user input.
-[] TODO: Build [ast](https://en.wikipedia.org/wiki/Abstract_syntax_tree) to generate the expressions.
-[] TODO: Build `evaluator` for the expressions created.
+- [x] TODO: Project setup for BIOS support.
+- [x] TODO: Project setup for UEFI support.
+- [] TODO: BIOS support for boot loader.
+- [x] TODO: UEFI support for boot loader.
+- [] TODO: load and execute our kernel code into the boot loader code.
+- [] TODO: filesystem support to handle the calculator's code and its files.
+- [] TODO: Basic memory management mechanism.
+- [] TODO: Output characters into screen.
+- [] TODO: I/O events for Keyboard input.
+- [] TODO: Simple REPL program to read user input, evaluate the expression and return output to screen.
+- [] TODO: Build `tokenizer` to lex, and `parser` to parse user input.
+- [] TODO: Build [ast](https://en.wikipedia.org/wiki/Abstract_syntax_tree) to generate the expressions.
+- [] TODO: Build `evaluator` for the expressions created.
