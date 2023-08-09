@@ -96,13 +96,16 @@ efi_main(EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
 
     Print((CHAR16 *)L"Loaded font\r\n");
 
+    OutputCursor cursor = (OutputCursor) {.x = 0, .y = 0};
+
 	BootInfo *boot_info;
 	{
-		UINTN size = sizeof(boot_info);
+		UINTN size = sizeof(BootInfo);
 		uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, size,
                 (void **)&boot_info);
 		boot_info->framebuffer = buff;
 		boot_info->psf1_font = font;
+        boot_info->cursor = &cursor;
 	}
 
 	if (boot_info == NULL) {

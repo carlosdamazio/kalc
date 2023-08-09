@@ -7,6 +7,4 @@ typedef struct {
 	PSF1_Font   *psf1_font;
 	FrameBuffer *framebuffer;
 } BootInfo;
-
 #endif
-

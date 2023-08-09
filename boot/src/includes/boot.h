@@ -5,6 +5,7 @@
 #endif
 
 typedef struct {
-	PSF1_Font   *psf1_font;
-	FrameBuffer *framebuffer;
+	PSF1_Font    *psf1_font;
+	FrameBuffer  *framebuffer;
+    OutputCursor *cursor;
 } BootInfo;
