@@ -2,8 +2,101 @@
 #include <efilib.h>
 #include <elf.h>
 
-#include "efiprot.h"
-#include "output.h"
+typedef struct {
+    EFI_PHYSICAL_ADDRESS FrameBufferBase;
+    UINTN FrameBufferSize;
+    UINTN HorizontalRes;
+    UINTN VerticalRes;
+    UINT32 PixelsPerScanLine;
+} FrameBuffer;
+
+typedef struct {
+    EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *info;
+    UINTN info_sz;
+    UINTN native_mode;
+    UINTN num_modes;
+} EnhancedVideoModeInfo;
+
+
+FrameBuffer*
+NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop)
+{
+    FrameBuffer *buff = NULL;
+    buff->FrameBufferBase   = gop->Mode->FrameBufferBase;
+    buff->FrameBufferSize   = gop->Mode->FrameBufferSize;
+    buff->HorizontalRes     = gop->Mode->Info->HorizontalResolution;
+    buff->VerticalRes       = gop->Mode->Info->VerticalResolution;
+    buff->PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+    return buff;
+}
+
+EFI_GRAPHICS_OUTPUT_PROTOCOL*
+GetGOP()
+{
+    EFI_GUID gopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
+
+    EFI_STATUS status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopGuid, NULL,
+                                          (void **)&gop);
+    if (EFI_ERROR(status)) {
+        Print((CHAR16*)L"Could not locate GOP\n");
+    }
+    return gop;
+}
+
+EnhancedVideoModeInfo*
+GetVideoModesInfo(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop) 
+{
+    EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *info;
+    EFI_STATUS status;
+    UINTN SizeOfInfo;
+    EnhancedVideoModeInfo *einfo = NULL;
+
+    status = uefi_call_wrapper(gop->QueryMode, 4, gop, 
+                               gop->Mode==NULL?0:gop->Mode->Mode, &SizeOfInfo,
+                               &info);
+    if (status == EFI_NOT_STARTED)
+        status = uefi_call_wrapper(gop->SetMode, 2, gop, 0);
+    if (EFI_ERROR(status)) {
+        Print((CHAR16*)L"ERROR: Unable to get native mode");
+    } else {
+        einfo->info = info;
+        einfo->info_sz = SizeOfInfo;
+        einfo->native_mode = gop->Mode->Mode;
+        einfo->num_modes = gop->Mode->MaxMode;
+    }
+
+    return einfo;
+}
+
+void
+PrintVideoModesInfo(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop,
+                    EnhancedVideoModeInfo *einfo) 
+{
+    
+    for (UINTN i = 0; i < einfo->num_modes - 1; i++) {
+        uefi_call_wrapper(gop->QueryMode, 4, gop, i, &einfo->info_sz, 
+                                   &einfo->info);
+        Print((CHAR16*) L"Mode %03d, Width %d, Height %d, Format %x %s\r\n",
+                i,
+                einfo->info->HorizontalResolution,
+                einfo->info->VerticalResolution,
+                einfo->info->PixelFormat,
+                i == einfo->native_mode ? "x": "");
+    } 
+}
+
+FrameBuffer*
+GetFrameBufferFromMode(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, UINTN mode)
+{
+    EFI_STATUS status = uefi_call_wrapper(gop->SetMode, 2, gop, mode);
+    if (EFI_ERROR(status)) {
+        Print((CHAR16*) L"ERROR: Could not set mode %03d", mode);
+        return NULL;
+    }
+    return NewFrameBuffer(gop);
+}
+
 
 int mem_cmp(const void *aptr, const void *bptr, int n)
 {
@@ -115,15 +208,19 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
         }
     }
 
-    Print((CHAR16 *)L"Kernel is loaded\r\n");
+    Print((CHAR16 *)L"Kernel file is loaded\r\n");
 
+    // Get GOP and look for video mode and set it up
     EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = GetGOP();
     if (gop == NULL) {
         return EFI_ERROR("Couldn't get GOP");
     }
+    Print((CHAR16*) L"Got GOP.\r\n");
 
-    void (*KernelStart)() = ((__attribute__((sysv_abi)) void (*)() ) header.e_entry);
-    KernelStart();
+    FrameBuffer *buff = GetFrameBufferFromMode(gop, 1);
+
+    unsigned int (*KernelStart)(FrameBuffer *buff) = ((__attribute__((sysv_abi)) unsigned int (*)(FrameBuffer *buff) ) header.e_entry);
+    Print((CHAR16*)L"Kernel result = %u\n", KernelStart(buff));
 
     return EFI_SUCCESS;
 }
