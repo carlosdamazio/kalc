@@ -28,7 +28,7 @@ OBJFLAGS=-j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j
 		 --target efi-app-$(ARCH) --subsystem=10
 
 
-all: $(TARGET) clean
+all: $(TARGET)
 
 $(OBJ):
 	$(CC) $(CFLAGS) -c $(SRC) -o $(OBJ)

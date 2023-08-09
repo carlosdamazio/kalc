@@ -3,28 +3,35 @@ MKISOFS := xorriso -as mkisofs
 
 OS=KalcOS
 
-OVMFDIR=/usr/share/edk2-ovmf/x64
-EFIDIR=boot
-BUILDDIR=build
-BOOTLOADER=$(BUILDDIR)/main.efi
-IMAGE=$(BUILDDIR)/$(OS).img
-TARGET=$(BUILDDIR)/$(OS).iso
+OVMFDIR := /usr/share/edk2-ovmf/x64
+EFIDIR := boot
+KERNELDIR := kernel
+BUILDDIR := build
 
-QEMUARGS=-drive file=$(TARGET) -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none
+KERNEL := $(BUILDDIR)/kernel.elf
+BOOTLOADER := $(BUILDDIR)/main.efi
+IMAGE := $(BUILDDIR)/$(OS).img
+TARGET := $(BUILDDIR)/$(OS).iso
 
+QEMUARGS := -drive file=$(TARGET) -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none
 
 all: $(TARGET)
 
 $(BUILDDIR):
 	@echo "[MAKE] Creating build directory..."
-	mkdir $@
+	@mkdir $@
 
 $(BOOTLOADER): |$(BUILDDIR)
 	@echo "[MAKE] Building $@..."
 	$(MAKE) -C $(EFIDIR)
-	mv $(EFIDIR)/main.efi $@
+	@mv $(EFIDIR)/main.efi $@
 
-$(IMAGE): $(BOOTLOADER)
+$(KERNEL): |$(BUILDDIR)
+	@echo "[MAKE] Building $@..."
+	$(MAKE) -C $(KERNELDIR)
+	mv $(KERNELDIR)/bin/kernel.elf $(BUILDDIR)
+
+$(IMAGE): $(KERNEL) $(BOOTLOADER)
 	@echo "[MAKE] Building $@..."
 	dd if=/dev/zero of=$(IMAGE) bs=1M count=50
 	mformat -i $(IMAGE) -f 1440
@@ -39,8 +46,10 @@ $(TARGET): $(IMAGE)
 
 clean:
 	@echo "[MAKE] Cleaning build objects..."
-	rm -f build/*
+	@rm -f build/*
+	@$(MAKE) -C $(KERNELDIR) clean
+	@$(MAKE) -C $(EFIDIR) clean
 
 run: $(TARGET)
 	@echo "[MAKE] Running QEMU..."
-	$(QEMU) $(QEMUARGS) 
+	@$(QEMU) $(QEMUARGS) 
