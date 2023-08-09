@@ -1,9 +1,8 @@
-#include "ktypes.h"
 #include "output.h"
 
 void
-plot_line(Framebuffer *buff, int y, u32 bbp, u32 pixel)
+draw_line(FrameBuffer *buff, int y, int bbp, unsigned long long pixel)
 {
-    for (u32 x = 0; x < buff->width / 2 * bbp; x++)
-        *(u32*)(x + (y * buff->pixels_per_scan_line * bbp) + buff->base_address) = pixel;
+    for (unsigned int x = 0; x < buff->HorizontalRes / 2 * bbp; x += 4)
+        *(unsigned int*)(x + (y * buff->PixelsPerScanLine * bbp) + buff->FrameBufferBase) = pixel;
 }

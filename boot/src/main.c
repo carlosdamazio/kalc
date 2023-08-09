@@ -3,11 +3,11 @@
 #include <elf.h>
 
 typedef struct {
-    EFI_PHYSICAL_ADDRESS FrameBufferBase;
-    UINTN FrameBufferSize;
-    UINTN HorizontalRes;
-    UINTN VerticalRes;
-    UINT32 PixelsPerScanLine;
+    void          *FrameBufferBase;
+    unsigned long FrameBufferSize;
+    unsigned int  HorizontalRes;
+    unsigned int  VerticalRes;
+    unsigned int  PixelsPerScanLine;
 } FrameBuffer;
 
 typedef struct {
@@ -18,16 +18,17 @@ typedef struct {
 } EnhancedVideoModeInfo;
 
 
+FrameBuffer buff;
+
 FrameBuffer*
 NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop)
 {
-    FrameBuffer *buff = NULL;
-    buff->FrameBufferBase   = gop->Mode->FrameBufferBase;
-    buff->FrameBufferSize   = gop->Mode->FrameBufferSize;
-    buff->HorizontalRes     = gop->Mode->Info->HorizontalResolution;
-    buff->VerticalRes       = gop->Mode->Info->VerticalResolution;
-    buff->PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
-    return buff;
+    buff.FrameBufferBase   = (void*) gop->Mode->FrameBufferBase;
+    buff.FrameBufferSize   = (unsigned long) gop->Mode->FrameBufferSize;
+    buff.HorizontalRes     = (unsigned int)  gop->Mode->Info->HorizontalResolution;
+    buff.VerticalRes       = (unsigned int)  gop->Mode->Info->VerticalResolution;
+    buff.PixelsPerScanLine = (unsigned int)  gop->Mode->Info->PixelsPerScanLine;
+    return &buff;
 }
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL*
@@ -216,10 +217,10 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
         return EFI_ERROR("Couldn't get GOP");
     }
     Print((CHAR16*) L"Got GOP.\r\n");
+    FrameBuffer *buff = NewFrameBuffer(gop);
+    Print((CHAR16*) L"Got framebuffer.\r\n");
 
-    FrameBuffer *buff = GetFrameBufferFromMode(gop, 1);
-
-    unsigned int (*KernelStart)(FrameBuffer *buff) = ((__attribute__((sysv_abi)) unsigned int (*)(FrameBuffer *buff) ) header.e_entry);
+    unsigned int (*KernelStart)(FrameBuffer*) = ((__attribute__((sysv_abi)) unsigned int (*)(FrameBuffer*) ) header.e_entry);
     Print((CHAR16*)L"Kernel result = %u\n", KernelStart(buff));
 
     return EFI_SUCCESS;

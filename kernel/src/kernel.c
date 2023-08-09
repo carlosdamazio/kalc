@@ -1,8 +1,7 @@
 #include "output.h"
 
-
-unsigned int _start(Framebuffer *buff)
+unsigned int _start(FrameBuffer *fbuff)
 {
-    plot_pixel(buff, 32, 32, 255);
-    return buff->width;
+    draw_line(fbuff, 50, 4, 0xff00ffff);
+    return fbuff->PixelsPerScanLine;
 }
