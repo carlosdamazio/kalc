@@ -6,12 +6,12 @@ typedef struct {
     unsigned char magic[2];
     unsigned char mode;
     unsigned char charsize;
-} PSF_Header;
+} PSF1_Header;
 
 typedef struct {
-    PSF_Header* psf_header;
-    void* glyph_buffer;
-} PSF_Font;
+    PSF1_Header *psf_header;
+    void       *glyph_buffer;
+} PSF1_Font;
 
 typedef struct {
     void          *FrameBufferBase;

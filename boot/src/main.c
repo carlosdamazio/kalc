@@ -31,8 +31,10 @@ typedef struct {
     UINTN num_modes;
 } EnhancedVideoModeInfo;
 
+
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs_protocol;
 EFI_LOADED_IMAGE_PROTOCOL       *loaded_image;
+
 
 FrameBuffer*
 NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop)
@@ -124,8 +126,8 @@ int mem_cmp(const void *aptr, const void *bptr, int n)
     return 0;
 }
 
-EFI_FILE
-*LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
+EFI_FILE*
+LoadFile(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE Image)
 {
     EFI_FILE *LoadedFile;
     EFI_GUID EfiImageProtocolGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
@@ -277,13 +279,16 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
         return EFI_ERROR("Couldn't get GOP");
     }
     Print((CHAR16*) L"Got GOP.\r\n");
+
+    // Get Framebuffer
     FrameBuffer *buff = NewFrameBuffer(gop);
     Print((CHAR16*) L"Got framebuffer.\r\n");
 
+    // Load font file
     PSF1_Font *font = LoadFont(NULL, (CHAR16 *) L"zap-light16.psf", Image);
     if (font == NULL) {
         Print((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
-        return EFI_ERROR((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
+        return EFI_ERROR(1);
     }
     Print((CHAR16*) L"Font file loaded.\r\n");
 
