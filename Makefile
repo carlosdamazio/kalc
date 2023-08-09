@@ -12,7 +12,7 @@ KERNEL     := $(BUILDDIR)/kernel.elf
 BOOTLOADER := $(BUILDDIR)/main.efi
 IMAGE 	   := $(BUILDDIR)/$(OS).img
 TARGET 	   := $(BUILDDIR)/$(OS).iso
-FONT   	   := ./zap-vga16.psf
+FONT   	   := zap-vga16.psf
 
 QEMUARGS := -drive file=$(TARGET) -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS.fd" -net none -vga cirrus
 

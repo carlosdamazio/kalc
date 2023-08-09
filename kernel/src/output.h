@@ -2,6 +2,17 @@
 #define OUTPUT_H
 #endif
 
+typedef struct { 
+    unsigned char magic[2];
+    unsigned char mode;
+    unsigned char charsize;
+} PSF_Header;
+
+typedef struct {
+    PSF_Header* psf_header;
+    void* glyph_buffer;
+} PSF_Font;
+
 typedef struct {
     void          *FrameBufferBase;
     unsigned long FrameBufferSize;
