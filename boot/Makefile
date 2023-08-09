@@ -1,27 +1,40 @@
 LD=ld
 
-SRC=boot.c
-OBJ=boot.o
-STATIC=boot.so 
-TARGET=boot.efi
+ARCH=x86_64
+SRC=main.c
+OBJ=main.o
+STATIC=main.so 
+TARGET=main.efi
 
 EFILIB=gnu-efi
-CFLAGS=-Ignu-efi/inc -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone \
-	   -maccumulate-outgoing-args
-LDFLAGS=-shared -Bsymbolic -L$(EFILIB)/x86_64/lib -L$(EFILIB)/x86_64/gnuefi -T$(EFILIB)/gnuefi/elf_x86_64_efi.lds \
-		$(EFILIB)/x86_64/gnuefi/crt0-efi-x86_64.o -lgnuefi -lefi
+EFIINC=$(EFILIB)/inc
+CFLAGS= -I$(EFIINC) \
+		-fno-stack-protector \
+	  	-fpic \
+	  	-fshort-wchar \
+	  	-mno-red-zone \
+	  	-Wall
+
+LDFLAGS=-nostdlib \
+		-znocombreloc \
+	    -shared \
+		-Bsymbolic \
+		-L$(EFILIB)/$(ARCH)/lib \
+		-L$(EFILIB)/$(ARCH)/gnuefi \
+		-T$(EFILIB)/gnuefi/elf_$(ARCH)_efi.lds \
+		$(EFILIB)/x86_64/gnuefi/crt0-efi-$(ARCH).o \
 
 OBJFLAGS=-j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc \
-		 --target efi-app-x86_64 --subsystem=10
+		 --target efi-app-$(ARCH) --subsystem=10
 
 
-all: $(TARGET)
+all: $(TARGET) clean
 
 $(OBJ):
 	$(CC) $(CFLAGS) -c $(SRC) -o $(OBJ)
 
 $(STATIC): $(OBJ)
-	$(LD) $(LDFLAGS) $(OBJ) -o $(STATIC)
+	$(LD) $(LDFLAGS) $(OBJ) -o $(STATIC) -lefi -lgnuefi
 
 $(TARGET): $(STATIC)
 	objcopy $(OBJFLAGS) $(STATIC) $(TARGET)
