@@ -2,8 +2,6 @@
 
 void _start(FrameBuffer *buff, PSF1_Font *font)
 {
-    for (int i = 0; i < 50; i++)
-        print_string_line(buff, font, 0xFFFFFFFF, "Hello, world!");
-
+    draw_line(buff, 50, 4, 0xffffffff);
     for (;;) {}
 }

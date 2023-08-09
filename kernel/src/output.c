@@ -10,10 +10,10 @@ put_new_line()
 
 // Draws line to the top of the screen with the desired colour. 
 void
-draw_line(FrameBuffer *buff, int y, int bbp, unsigned long long colour)
+draw_line(FrameBuffer *buff, int y, int bpp, unsigned long long colour)
 {
-    for (unsigned int x = 0; x < buff->HorizontalRes / 2 * bbp; x += 4)
-        *(unsigned int*)(x + (y * buff->PixelsPerScanLine * bbp) + buff->FrameBufferBase) = colour;
+    for (unsigned int x = 0; x < buff->HorizontalRes / 2 * bpp; x += 4)
+        *(unsigned int*)(x + (y * buff->PixelsPerScanLine * bpp) + buff->FrameBufferBase) = colour;
 }
 
 // Prints a single character in a certain colour in x and y offset from the

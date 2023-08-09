@@ -40,7 +40,7 @@ FrameBuffer*
 NewFrameBuffer(EFI_GRAPHICS_OUTPUT_PROTOCOL *gop)
 {
     static FrameBuffer buff;
-    buff.FrameBufferBase   = (void*) gop->Mode->FrameBufferBase;
+    buff.FrameBufferBase   = (void*)         gop->Mode->FrameBufferBase;
     buff.FrameBufferSize   = (unsigned long) gop->Mode->FrameBufferSize;
     buff.HorizontalRes     = (unsigned int)  gop->Mode->Info->HorizontalResolution;
     buff.VerticalRes       = (unsigned int)  gop->Mode->Info->VerticalResolution;
@@ -58,6 +58,7 @@ GetGOP()
                                           (void **)&gop);
     if (EFI_ERROR(status)) {
         Print((CHAR16*)L"Could not locate GOP\n");
+        return NULL;
     }
     return gop;
 }
@@ -163,11 +164,13 @@ LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
         return NULL;
     }
     Print((CHAR16*) L"Loaded font file.\r\n");
+
     PSF1_Header *header;
-    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Header), (void **)&header);
-    UINTN header_size = sizeof(PSF1_Header);
-    uefi_call_wrapper(font->Read, 3, font, &header_size, header);
-    
+    {
+        uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Header), (void **)&header);
+        UINTN header_size = sizeof(PSF1_Header);
+        uefi_call_wrapper(font->Read, 3, font, &header_size, header);
+    }
     if (header->magic[0] != PSF_MAGIC0 || header->magic[1] != PSF_MAGIC1) {
         Print((CHAR16*) L"Magic 0: %x\r\n", header->magic[0]);
         Print((CHAR16*) L"Magic 1: %x\r\n", header->magic[1]);
@@ -189,8 +192,10 @@ LoadFont(EFI_FILE *Directory, CHAR16 *Path, EFI_HANDLE ImageHandle)
     }
 
     PSF1_Font *built_font;
-    uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Font),
-                (void **) &built_font);
+    {
+        uefi_call_wrapper(BS->AllocatePool, 3, EfiLoaderData, sizeof(PSF1_Font),
+                          (void **) &built_font);
+    }
     built_font->psf_header = header;
     built_font->glyph_buffer = glyph_buffer;
     return built_font;
@@ -275,9 +280,8 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
 
     // Get GOP and look for video mode and set it up
     EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = GetGOP();
-    if (gop == NULL) {
-        return EFI_ERROR("Couldn't get GOP");
-    }
+    if (gop == NULL) 
+        return EFI_PROTOCOL_ERROR;
     Print((CHAR16*) L"Got GOP.\r\n");
 
     // Get Framebuffer
@@ -285,10 +289,10 @@ efi_main (EFI_HANDLE Image, EFI_SYSTEM_TABLE *SystemTable)
     Print((CHAR16*) L"Got framebuffer.\r\n");
 
     // Load font file
-    PSF1_Font *font = LoadFont(NULL, (CHAR16 *) L"zap-light16.psf", Image);
+    PSF1_Font *font = LoadFont(NULL, (CHAR16*) L"zap-light16.psf", Image);
     if (font == NULL) {
         Print((CHAR16*) L"Couldn't get font file: either is not valid or not found.\r\n");
-        return EFI_ERROR(1);
+        return EFI_LOAD_ERROR;
     }
     Print((CHAR16*) L"Font file loaded.\r\n");
 
